@@ -1,7 +1,7 @@
 
 # TERA Launcher
 
-This project is a pure Python implementation to launch the MMORPG "TERA Online." It leverages Windows APIs to initiate the game client launcher (`TL.exe`) and handle in-game events, connection, and exit statuses. This project uses 32-bit Python due to compatibility requirements with TERA's client launcher (`TL.exe`).
+This project is a pure Python implementation to launch the MMORPG "TERA Online." It leverages Windows APIs to initiate the game client launcher (`TL.exe`) and handle in-game events, connection, and exit statuses.
 
 ## Features
 
@@ -9,7 +9,7 @@ This project is a pure Python implementation to launch the MMORPG "TERA Online."
 - **Message Listener**: Registers and listens for game-related events, exit codes, and error messages.
 - **Event Logging**: Logs game events, errors, and status codes with custom mapping for easy debugging.
 - **Server Communication**: Manages server-related messages, such as last server, character count, and web link URLs.
-- **Custom Error Handling**: Provides detailed error messages for game crashes, network errors, and authentication issues.
+- **Verbose Error Handling**: Provides detailed error messages for game crashes, network errors, and authentication issues.
 
 ## Project Structure
 
@@ -31,51 +31,51 @@ pip install pywin32==306
 
 ## Usage
 
-1. **Initialize Loader**:
-   Create a new `Loader` object by passing game configuration data.
+1. **Set Game Config**: Set up the game configuration data
+   ```python
+   from TeraLauncher import GameConfig
+   
+   game_config = GameConfig()
+   
+   # Choose language code to load according datacenter
+   # en: USA, fr: FRA, kr: KOR, de: GER, uk: EUR, ru: RUS, jp: JPN, tw: TW, th: THA
+   game_config.lang = SESSION['lang_code'],
+   
+   # URL to your API server: string
+   game_config.url = f"{SERVER_HOST}",
+   game_config.sls = f"/path/to/server_list.{game_config.lang}"
+   
+   # User auth token: string
+   game_config.ticket = SESSION['auth_key']
+   game_config.token = SESSION['auth_key']
+   game_config.auth_token = SESSION['auth_key']
+   game_config.access_token = SESSION['auth_key']
+   
+   # User name: string
+   game_config.account_name = SESSION['user_name']
+   game_config.game_account_name = SESSION['user_name']
+   game_config.master_account_name = SESSION['user_name']
+   
+   # User ID: integer
+   game_config.id = SESSION['user_id']
+   game_config.user_id = SESSION['user_id']
+   
+   # User access permissions: integer
+   game_config.access_level = SESSION['access_level']
+   game_config.user_permission = SESSION['user_permission']
+   ```
+       
+2. **Initialize IPC Loader**: 
+   Create a new `IPCLoader` object by passing game configuration data.
+   ```python
+   from TeraLauncher import IPCLoader
+   
+   # Initialize the IPC Loader class
+   TL = IPCLoader(game_config, exit_callback, logger, debug)
+   TL.MessageListener(b"gameEvent", 1000)
+   ```
 
-    ```python
-    from TeraLoader import Loader
-    
-    # Example Game String of all possible keys and their intended values
-    game_str = {
-        "url": f"{SERVER_HOST}",
-        "sls": f"/rest/v1/launcherApi/GetServerList.{lang_code}",
-        "lang": f"{lang_code}",
-        "ticket": f"{SESSION['authKey']}",
-        "token": f"{SESSION['authKey']}",
-        "auth_token": f"{SESSION['authKey']}",
-        "access_token": f"{SESSION['authKey']}",
-        "last_connected_server_id": SESSION['lastServer'],
-        "account_name": "TERA",
-        "account_status": 1,
-        "game_account_name": "TERA",
-        "master_account_name": f"{SESSION['accountDBID']}",
-        "chars_per_server": [
-            {"id": "2800", "char_count": "10"},
-            {"id": "2801", "char_count": "11"}
-        ],
-        "id": SESSION['accountDBID'],
-        "user_id": SESSION['accountDBID'],
-        "last_svr": SESSION['lastServer'],
-        "char_cnt": 10,
-        "access_level": SESSION['privilege'],
-        "user_permission": SESSION['permission'],
-        "result-code": 200,
-        "result-message": "OK"
-    }
-
-    def exit_callback():
-        print("Game exited")
-
-    TL = Loader(game_str, exit_callback, debug=True)
-
-    # message listener
-    TL.MessageListener(b"gameEvent", 1000)
-    
-    ```
-
-2. **Register Message Listener**:
+3. **Register Message Listener**:
    Set up a listener to handle server and game messages.
 
     ```python
@@ -83,10 +83,9 @@ pip install pywin32==306
     mlThread = Thread(target=TL.RegisterMessageListener, daemon=True)
     mlThread.start()
     TID_ML = mlThread.native_id
-    if DEBUG: std_out(f"Registered Message Listener | TID: {TID_ML}")
     ```
 
-3. **Launch Game**:
+4. **Launch Game**:
    Call `LaunchGame()` on the `Loader` instance to start the TERA client.
 
     ```python
@@ -94,7 +93,6 @@ pip install pywin32==306
     mainThread = Thread(target=TL.LaunchGame, daemon=True)
     mainThread.start()
     TID_TERA = mainThread.native_id
-    if DEBUG: std_out(f"Launching TERA Game Client | TID: {TID_TERA}")
     ```
 
 ## Event Codes and Error Handling
@@ -102,10 +100,6 @@ pip install pywin32==306
 Game events and error messages are logged with specific codes and descriptions:
 - **Exit Codes**: Defined in `CLIENT_END_CODE`, such as `5` for graphics driver errors and `10` for insufficient RAM.
 - **Launcher Events**: Defined in `LAUNCHER_EVENT_CODE`, including authentication, patcher, and GUI initialization events.
-
-## Debugging and Logs
-
-All messages and codes are logged via the `std_out` function in `Helper.py`, providing insights into game events and errors. Set `debug=True` when initializing the `Loader` to enable detailed output.
 
 ## Contributing
 
