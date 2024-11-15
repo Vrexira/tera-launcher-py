@@ -2,6 +2,12 @@ CLIENT_END_CODE = {
     0: {
         0: 'Standard exit of the the game. Normal close.'
     },
+	1: {
+		0: 'Error initializing anti cheat service. Cannot start client.'
+	},
+	3: {
+		0: 'Error in authentication string. Cannot start client.'
+	},
     5: {
         0: 'Graphics driver error, please check your graphics card settings and make sure it has the latest driver.'
     },
